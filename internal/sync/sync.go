@@ -258,36 +258,36 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 
 	// cards
 	for _, c := range cards {
-		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("main/card_thumbnails/%d_normal.webp", c.ID),
-			urls:    []string{assets.CardNormalURLJP(c.AssetbundleName)},
-		})
-		if c.CardRarityType == "rarity_3" || c.CardRarityType == "rarity_4" {
-			jobs = append(jobs, assetJob{
-				destRel: fmt.Sprintf("main/card_thumbnails/%d_after_training.webp", c.ID),
-				urls:    []string{assets.CardAfterTrainingURLJP(c.AssetbundleName)},
-			})
-		}
+    	jobs = append(jobs, assetJob{
+    	    destRel: fmt.Sprintf("card_thumbnails/%d_normal.webp", c.ID),
+    	    urls:    []string{assets.CardNormalURLJP(c.AssetbundleName)},
+    	})
+    	if c.CardRarityType == "rarity_3" || c.CardRarityType == "rarity_4" {
+    	    jobs = append(jobs, assetJob{
+    	        destRel: fmt.Sprintf("card_thumbnails/%d_after_training.webp", c.ID),
+    	        urls:    []string{assets.CardAfterTrainingURLJP(c.AssetbundleName)},
+    	    })
+    	}
 	}
 
 	// events
 	for _, e := range events {
-		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("main/sekai-events/event_%d/logo.webp", e.ID),
-			urls:    []string{assets.EventLogoURLCN(e.AssetbundleName), assets.EventLogoURLJP(e.AssetbundleName)},
-		})
-		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("main/sekai-events/event_%d/bg.webp", e.ID),
-			urls:    []string{assets.EventBgURLCN(e.AssetbundleName), assets.EventBgURLJP(e.AssetbundleName)},
-		})
+    	jobs = append(jobs, assetJob{
+    	    destRel: fmt.Sprintf("sekai-events/event_%d/logo.webp", e.ID),
+    	    urls:    []string{assets.EventLogoURLCN(e.AssetbundleName), assets.EventLogoURLJP(e.AssetbundleName)},
+    	})
+    	jobs = append(jobs, assetJob{
+    	    destRel: fmt.Sprintf("sekai-events/event_%d/bg.webp", e.ID),
+    	    urls:    []string{assets.EventBgURLCN(e.AssetbundleName), assets.EventBgURLJP(e.AssetbundleName)},
+    	})
 	}
 
 	// gachas
 	for _, g := range gachas {
-		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("main/sekai-gachas/gacha_%d/banner.webp", g.ID),
-			urls:    []string{assets.GachaBannerURLCN(g.ID), assets.GachaBannerURLJP(g.ID)},
-		})
+    	jobs = append(jobs, assetJob{
+    	    destRel: fmt.Sprintf("sekai-gachas/gacha_%d/banner.webp", g.ID),
+    	    urls:    []string{assets.GachaBannerURLCN(g.ID), assets.GachaBannerURLJP(g.ID)},
+    	})
 	}
 
 	sem := make(chan struct{}, cfg.MaxConcurrency)
