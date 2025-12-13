@@ -1,0 +1,58 @@
+name: pjsk-sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "00 4 * * *" 
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sync repo
+        uses: actions/checkout@v4
+
+      - name: Checkout image hosting repo
+        uses: actions/checkout@v4
+        with:
+          repository: Exmeaning/Exmeaning-Image-hosting
+          ref: main
+          token: ${{ secrets.IMAGE_REPO_TOKEN }}
+          path: image-hosting
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: go mod tidy
+        run: go mod tidy
+
+      - name: Run sync (db + assets to image repo dir)
+        env:
+          POSTGRES_CONNECTION_STRING: ${{ secrets.POSTGRES_CONNECTION_STRING }}
+          PG_SSLMODE: require
+          DOWNLOAD_ASSETS: "true"
+          IMAGE_REPO_DIR: image-hosting
+          MAX_CONCURRENCY: "6"
+        run: go run ./cmd/pjsk-sync
+
+      - name: Commit and push image hosting changes
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          cd image-hosting
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No asset changes."
+            exit 0
+          fi
+          git config user.name "pjsk-sync-bot"
+          git config user.email "pjsk-sync-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "sync assets $(date +'%Y-%m-%d %H:%M:%S %Z')"
+          git push
