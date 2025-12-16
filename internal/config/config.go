@@ -23,9 +23,11 @@ func Load() Config {
 		PostgresConnString: os.Getenv("POSTGRES_CONNECTION_STRING"),
 		PGSSLMode:          getenv("PG_SSLMODE", "require"),
 
-		GachasURL: getenv("GACHAS_URL", "https://raw.githubusercontent.com/Team-Haruki/haruki-sekai-sc-master/main/master/gachas.json"),
-		CardsURL:  getenv("CARDS_URL", "https://raw.githubusercontent.com/Team-Haruki/haruki-sekai-sc-master/main/master/cards.json"),
-		EventsURL: getenv("EVENTS_URL", "https://raw.githubusercontent.com/Team-Haruki/haruki-sekai-sc-master/main/master/events.json"),
+		// 修改了默认源至 kotori8823/sekai-sc-master-db
+		// 注意：此处使用了 raw.githubusercontent.com 以获取纯文本 JSON
+		GachasURL: getenv("GACHAS_URL", "https://raw.githubusercontent.com/kotori8823/sekai-sc-master-db/master/gachas.json"),
+		CardsURL:  getenv("CARDS_URL", "https://raw.githubusercontent.com/kotori8823/sekai-sc-master-db/master/cards.json"),
+		EventsURL: getenv("EVENTS_URL", "https://raw.githubusercontent.com/kotori8823/sekai-sc-master-db/master/events.json"),
 
 		DownloadAssets: getenvBool("DOWNLOAD_ASSETS", true),
 		ImageRepoDir:   getenv("IMAGE_REPO_DIR", "image-hosting"),
