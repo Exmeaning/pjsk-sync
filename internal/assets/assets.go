@@ -62,3 +62,11 @@ func GachaBannerURLCN(gachaID int) string {
 func GachaBannerURLJP(gachaID int) string {
 	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/home/banner/banner_gacha%d/banner_gacha%d.webp", gachaID, gachaID)
 }
+
+// Gacha logo as fallback when banner is not available
+func GachaLogoURLCN(gachaID int) string {
+	return fmt.Sprintf("https://storage.sekai.best/sekai-cn-assets/gacha/ab_gacha_%d/logo/logo.webp", gachaID)
+}
+func GachaLogoURLJP(gachaID int) string {
+	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/gacha/ab_gacha_%d/logo/logo.webp", gachaID)
+}

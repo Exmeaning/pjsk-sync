@@ -283,10 +283,16 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 	}
 
 	// gachas
+	// gachas - banner first, fallback to logo if banner returns 404
 	for _, g := range gachas {
-    	jobs = append(jobs, assetJob{
-    	    destRel: fmt.Sprintf("sekai-gachas/gacha_%d/banner.webp", g.ID),
-    	    urls:    []string{assets.GachaBannerURLCN(g.ID), assets.GachaBannerURLJP(g.ID)},
+	    jobs = append(jobs, assetJob{
+	        destRel: fmt.Sprintf("sekai-gachas/gacha_%d/banner.webp", g.ID),
+    	    urls: []string{
+    	        assets.GachaBannerURLCN(g.ID),
+    	        assets.GachaBannerURLJP(g.ID),
+    	        assets.GachaLogoURLCN(g.ID),  // fallback: logo CN
+    	        assets.GachaLogoURLJP(g.ID),  // fallback: logo JP
+    	    },
     	})
 	}
 
