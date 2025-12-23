@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	_ "image/jpeg" // Added for JPEG decoder registration
+	_ "image/png"  // Added for PNG decoder registration
 	"io"
 	"net/http"
 	"time"
