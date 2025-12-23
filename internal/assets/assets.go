@@ -53,7 +53,14 @@ func ConvertToWebP(data []byte) ([]byte, error) {
 	img, _, err := image.Decode(bytes.NewReader(data))
 
 	if err != nil {
-		return nil, fmt.Errorf("decode image: %w", err)
+		// Debug helper: print first few bytes to see what we actually got
+		peekLen := 100
+		if len(data) < peekLen {
+			peekLen = len(data)
+		}
+		preview := string(data[:peekLen])
+
+		return nil, fmt.Errorf("decode image: %w (header: %q, len: %d)", err, preview, len(data))
 	}
 
 	var buf bytes.Buffer
