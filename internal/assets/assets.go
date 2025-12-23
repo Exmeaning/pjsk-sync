@@ -5,11 +5,13 @@ import (
 	"context"
 	"fmt"
 	"image"
+	_ "image/jpeg" // Added for JPEG decoder registration
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/HugoSmits86/nativewebp"
+	_ "golang.org/x/image/webp" // Added for WebP decoder registration
 )
 
 type Downloader struct {
@@ -40,9 +42,16 @@ func (d *Downloader) Get(ctx context.Context, url string) ([]byte, int, error) {
 	return b, resp.StatusCode, nil
 }
 
-// ConvertToWebP converts image data (expected to be PNG) to WebP format using pure Go encoder.
+// ConvertToWebP converts image data (expected to be PNG, but supports others) to WebP format using pure Go encoder.
 func ConvertToWebP(data []byte) ([]byte, error) {
+	// Register formats to ensure we can decode whatever we got (some "png" urls might actually redirect to other formats, or be mislabeled)
+	// image/png is imported, so registered.
+	// Let's also ensure we import others if needed, but for now assuming input might be missing headers or weird.
+	// Actually, the error "image: unknown format" usually means the magic bytes weren't recognized.
+	// Importing _ "image/jpeg" and _ "golang.org/x/image/webp" in a loop or init is better practice but here we can just ensure imports.
+
 	img, _, err := image.Decode(bytes.NewReader(data))
+
 	if err != nil {
 		return nil, fmt.Errorf("decode image: %w", err)
 	}
