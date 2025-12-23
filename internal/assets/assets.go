@@ -36,37 +36,39 @@ func (d *Downloader) Get(ctx context.Context, url string) ([]byte, int, error) {
 	return b, resp.StatusCode, nil
 }
 
+const BaseURL = "https://assets.unipjsk.com"
+
 func CardNormalURLJP(assetbundle string) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/thumbnail/chara/%s_normal.webp", assetbundle)
+	return fmt.Sprintf("%s/startapp/thumbnail/chara/%s_normal.png", BaseURL, assetbundle)
 }
 func CardAfterTrainingURLJP(assetbundle string) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/thumbnail/chara/%s_after_training.webp", assetbundle)
+	return fmt.Sprintf("%s/startapp/thumbnail/chara/%s_after_training.png", BaseURL, assetbundle)
 }
 
 func EventLogoURLCN(eventAssetbundle string) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-cn-assets/event/%s/logo/logo.webp", eventAssetbundle)
+	return fmt.Sprintf("%s/ondemand/event/%s/logo/logo.png", BaseURL, eventAssetbundle)
 }
 func EventBgURLCN(eventAssetbundle string) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-cn-assets/event/%s/screen/bg.webp", eventAssetbundle)
+	return fmt.Sprintf("%s/ondemand/event/%s/screen/bg.png", BaseURL, eventAssetbundle)
 }
 func EventLogoURLJP(eventAssetbundle string) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/event/%s/logo/logo.webp", eventAssetbundle)
+	return fmt.Sprintf("%s/ondemand/event/%s/logo/logo.png", BaseURL, eventAssetbundle)
 }
 func EventBgURLJP(eventAssetbundle string) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/event/%s/screen/bg.webp", eventAssetbundle)
+	return fmt.Sprintf("%s/ondemand/event/%s/screen/bg.png", BaseURL, eventAssetbundle)
 }
 
 func GachaBannerURLCN(gachaID int) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-cn-assets/home/banner/banner_gacha%d/banner_gacha%d.webp", gachaID, gachaID)
+	return fmt.Sprintf("%s/startapp/home/banner/banner_gacha%d/banner_gacha%d.png", BaseURL, gachaID, gachaID)
 }
 func GachaBannerURLJP(gachaID int) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/home/banner/banner_gacha%d/banner_gacha%d.webp", gachaID, gachaID)
+	return fmt.Sprintf("%s/startapp/home/banner/banner_gacha%d/banner_gacha%d.png", BaseURL, gachaID, gachaID)
 }
 
 // Gacha logo as fallback when banner is not available
 func GachaLogoURLCN(gachaID int) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-cn-assets/gacha/ab_gacha_%d/logo/logo.webp", gachaID)
+	return fmt.Sprintf("%s/ondemand/gacha/ab_gacha_%d/logo/logo.png", BaseURL, gachaID)
 }
 func GachaLogoURLJP(gachaID int) string {
-	return fmt.Sprintf("https://storage.sekai.best/sekai-jp-assets/gacha/ab_gacha_%d/logo/logo.webp", gachaID)
+	return fmt.Sprintf("%s/ondemand/gacha/ab_gacha_%d/logo/logo.png", BaseURL, gachaID)
 }

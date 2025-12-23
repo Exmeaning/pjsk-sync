@@ -258,42 +258,42 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 
 	// cards
 	for _, c := range cards {
-    	jobs = append(jobs, assetJob{
-    	    destRel: fmt.Sprintf("card_thumbnails/%d_normal.webp", c.ID),
-    	    urls:    []string{assets.CardNormalURLJP(c.AssetbundleName)},
-    	})
-    	if c.CardRarityType == "rarity_3" || c.CardRarityType == "rarity_4" {
-    	    jobs = append(jobs, assetJob{
-    	        destRel: fmt.Sprintf("card_thumbnails/%d_after_training.webp", c.ID),
-    	        urls:    []string{assets.CardAfterTrainingURLJP(c.AssetbundleName)},
-    	    })
-    	}
+		jobs = append(jobs, assetJob{
+			destRel: fmt.Sprintf("card_thumbnails/%d_normal.png", c.ID),
+			urls:    []string{assets.CardNormalURLJP(c.AssetbundleName)},
+		})
+		if c.CardRarityType == "rarity_3" || c.CardRarityType == "rarity_4" {
+			jobs = append(jobs, assetJob{
+				destRel: fmt.Sprintf("card_thumbnails/%d_after_training.png", c.ID),
+				urls:    []string{assets.CardAfterTrainingURLJP(c.AssetbundleName)},
+			})
+		}
 	}
 
 	// events
 	for _, e := range events {
-    	jobs = append(jobs, assetJob{
-    	    destRel: fmt.Sprintf("sekai-events/event_%d/logo.webp", e.ID),
-    	    urls:    []string{assets.EventLogoURLCN(e.AssetbundleName), assets.EventLogoURLJP(e.AssetbundleName)},
-    	})
-    	jobs = append(jobs, assetJob{
-    	    destRel: fmt.Sprintf("sekai-events/event_%d/bg.webp", e.ID),
-    	    urls:    []string{assets.EventBgURLCN(e.AssetbundleName), assets.EventBgURLJP(e.AssetbundleName)},
-    	})
+		jobs = append(jobs, assetJob{
+			destRel: fmt.Sprintf("sekai-events/event_%d/logo.png", e.ID),
+			urls:    []string{assets.EventLogoURLCN(e.AssetbundleName), assets.EventLogoURLJP(e.AssetbundleName)},
+		})
+		jobs = append(jobs, assetJob{
+			destRel: fmt.Sprintf("sekai-events/event_%d/bg.png", e.ID),
+			urls:    []string{assets.EventBgURLCN(e.AssetbundleName), assets.EventBgURLJP(e.AssetbundleName)},
+		})
 	}
 
 	// gachas
 	// gachas - banner first, fallback to logo if banner returns 404
 	for _, g := range gachas {
-	    jobs = append(jobs, assetJob{
-	        destRel: fmt.Sprintf("sekai-gachas/gacha_%d/banner.webp", g.ID),
-    	    urls: []string{
-    	        assets.GachaBannerURLCN(g.ID),
-    	        assets.GachaBannerURLJP(g.ID),
-    	        assets.GachaLogoURLCN(g.ID),  // fallback: logo CN
-    	        assets.GachaLogoURLJP(g.ID),  // fallback: logo JP
-    	    },
-    	})
+		jobs = append(jobs, assetJob{
+			destRel: fmt.Sprintf("sekai-gachas/gacha_%d/banner.png", g.ID),
+			urls: []string{
+				assets.GachaBannerURLCN(g.ID),
+				assets.GachaBannerURLJP(g.ID),
+				assets.GachaLogoURLCN(g.ID), // fallback: logo CN
+				assets.GachaLogoURLJP(g.ID), // fallback: logo JP
+			},
+		})
 	}
 
 	sem := make(chan struct{}, cfg.MaxConcurrency)
@@ -327,6 +327,13 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 					content = b
 					break
 				}
+			}
+
+			if content != nil {
+				// 由于环境不支持 webp 编码，直接保存为 png
+				// if converted, err := assets.ConvertToWebP(content); err == nil {
+				// 	content = converted
+				// }
 			}
 
 			if content == nil {
