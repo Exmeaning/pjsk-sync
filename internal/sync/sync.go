@@ -259,12 +259,12 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 	// cards
 	for _, c := range cards {
 		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("card_thumbnails/%d_normal.png", c.ID),
+			destRel: fmt.Sprintf("card_thumbnails/%d_normal.webp", c.ID),
 			urls:    []string{assets.CardNormalURLJP(c.AssetbundleName)},
 		})
 		if c.CardRarityType == "rarity_3" || c.CardRarityType == "rarity_4" {
 			jobs = append(jobs, assetJob{
-				destRel: fmt.Sprintf("card_thumbnails/%d_after_training.png", c.ID),
+				destRel: fmt.Sprintf("card_thumbnails/%d_after_training.webp", c.ID),
 				urls:    []string{assets.CardAfterTrainingURLJP(c.AssetbundleName)},
 			})
 		}
@@ -273,11 +273,11 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 	// events
 	for _, e := range events {
 		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("sekai-events/event_%d/logo.png", e.ID),
+			destRel: fmt.Sprintf("sekai-events/event_%d/logo.webp", e.ID),
 			urls:    []string{assets.EventLogoURLCN(e.AssetbundleName), assets.EventLogoURLJP(e.AssetbundleName)},
 		})
 		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("sekai-events/event_%d/bg.png", e.ID),
+			destRel: fmt.Sprintf("sekai-events/event_%d/bg.webp", e.ID),
 			urls:    []string{assets.EventBgURLCN(e.AssetbundleName), assets.EventBgURLJP(e.AssetbundleName)},
 		})
 	}
@@ -286,7 +286,7 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 	// gachas - banner first, fallback to logo if banner returns 404
 	for _, g := range gachas {
 		jobs = append(jobs, assetJob{
-			destRel: fmt.Sprintf("sekai-gachas/gacha_%d/banner.png", g.ID),
+			destRel: fmt.Sprintf("sekai-gachas/gacha_%d/banner.webp", g.ID),
 			urls: []string{
 				assets.GachaBannerURLCN(g.ID),
 				assets.GachaBannerURLJP(g.ID),
@@ -306,10 +306,40 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 		j := j
 		destAbs := filepath.Join(root, j.destRel)
 
+		// 1. Check if WebP already exists
 		if fileExists(destAbs) {
+			mu.Lock()
 			skipped++
+			mu.Unlock()
 			continue
 		}
+
+		// 2. Check if legacy PNG exists (from previous run)
+		// Need to verify if the file was saved as .png or just named.
+		// Based on previous history: we used .png extension in the last step.
+		// So valid legacy path is destAbs replaced .webp -> .png
+		legacyPngPath := strings.TrimSuffix(destAbs, ".webp") + ".png"
+		if fileExists(legacyPngPath) {
+			// Convert existing PNG to WebP
+			pngData, err := os.ReadFile(legacyPngPath)
+			if err == nil && len(pngData) > 0 {
+				webpData, err := assets.ConvertToWebP(pngData)
+				if err == nil {
+					if err := writeFileAtomic(destAbs, webpData); err == nil {
+						// Remove legacy file upon success
+						_ = os.Remove(legacyPngPath)
+						mu.Lock()
+						downloaded++ // counted as processed/saved
+						mu.Unlock()
+						log.Printf("asset migrated to webp: %s", j.destRel)
+						continue
+					}
+				} else {
+					log.Printf("legacy png convert failed: %s err=%v", legacyPngPath, err)
+				}
+			}
+		}
+		// If we are here, we need to download
 
 		wg.Add(1)
 		go func() {
@@ -329,16 +359,17 @@ func syncAssetsToDir(ctx context.Context, cfg config.Config, cards []sekai.Card,
 				}
 			}
 
-			if content != nil {
-				// 由于环境不支持 webp 编码，直接保存为 png
-				// if converted, err := assets.ConvertToWebP(content); err == nil {
-				// 	content = converted
-				// }
-			}
-
 			if content == nil {
 				log.Printf("asset miss (download failed): %s last_status=%d", j.destRel, lastStatus)
 				return
+			}
+
+			// Convert downloaded content (PNG) to WebP
+			if converted, err := assets.ConvertToWebP(content); err == nil {
+				content = converted
+			} else {
+				log.Printf("webp convert failed: %s err=%v", j.destRel, err)
+				return // Fail if conversion fails, as user requested WebP compatibility
 			}
 
 			if err := writeFileAtomic(destAbs, content); err != nil {

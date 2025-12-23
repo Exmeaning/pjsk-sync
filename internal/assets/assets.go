@@ -1,11 +1,15 @@
 package assets
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"image"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/HugoSmits86/nativewebp"
 )
 
 type Downloader struct {
@@ -34,6 +38,22 @@ func (d *Downloader) Get(ctx context.Context, url string) ([]byte, int, error) {
 		return nil, resp.StatusCode, err
 	}
 	return b, resp.StatusCode, nil
+}
+
+// ConvertToWebP converts image data (expected to be PNG) to WebP format using pure Go encoder.
+func ConvertToWebP(data []byte) ([]byte, error) {
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("decode image: %w", err)
+	}
+
+	var buf bytes.Buffer
+	// nativewebp.Encode requires options. Passing nil usually defaults, but let's be explicit if needed.
+	// Based on error: want (io.Writer, image.Image, *nativewebp.Options)
+	if err := nativewebp.Encode(&buf, img, nil); err != nil {
+		return nil, fmt.Errorf("encode webp: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 const BaseURL = "https://assets.unipjsk.com"
